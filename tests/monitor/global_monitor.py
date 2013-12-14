@@ -14,6 +14,7 @@ DBusGMainLoop(set_as_default=True)
 
 from connection_monitor import ConnectionMonitor
 from channel_observer import ChannelObserver
+from ThiefApprover import ThiefApprover, ThiefHandler
 from telepathy.client import Connection
 from telepathy.interfaces import (
     CONNECTION, CLIENT)
@@ -73,7 +74,26 @@ def publish_observer(name):
 
     return False
 
+def publish_approver(name):
+    bus_name = '.'.join([CLIENT, name])
+    object_path = '/' + bus_name.replace('.', '/')
+
+    bus_name = dbus.service.BusName(bus_name, bus=dbus.SessionBus())
+    ThiefApprover(bus_name, object_path)
+
+    return False
+
+def publish_handler(name):
+    bus_name = '.'.join([CLIENT, name])
+    object_path = '/' + bus_name.replace('.', '/')
+
+    bus_name = dbus.service.BusName(bus_name, bus=dbus.SessionBus())
+    ThiefHandler(bus_name, object_path)
+
+    return False
 
 if __name__ == "__main__":
-    gobject.timeout_add(2, publish_observer, "SimpleTextChannelObserver")
+    gobject.timeout_add(1, publish_observer, "SimpleTextChannelObserver")
+    gobject.timeout_add(2, publish_approver, "ThiefApprover")
+    gobject.timeout_add(3, publish_handler, "ThiefHandler")
     Monitor().run()
